@@ -84,3 +84,4 @@ Other entities still unknown (TBD)
 
 ## 5. Development Workflow
 - **MCP Servers**: The project it is possible that there are MCP servers for local database access (yet they can be not available).
+- current openVidu sevrer access: `ssh -i ~/keys/openvidu.pem ubuntu@18.158.33.29` 
