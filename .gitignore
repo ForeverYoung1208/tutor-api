@@ -1,2 +1,6 @@
 example
+_bmad
+.windsurf
 .env
+node_modules
+/dist

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: tutor-platform-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tutor_platform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tutor-network
+
+  adminer:
+    image: adminer
+    container_name: tutor-platform-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - tutor-network
+
+volumes:
+  postgres_data:
+
+networks:
+  tutor-network:
+    driver: bridge
