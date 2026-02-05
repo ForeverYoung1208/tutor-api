@@ -47,11 +47,10 @@ Authorization: Bearer {{access_token}}
 
 
 ### Refresh Access Token
-# @refresh
+# @name refresh
 
 GET http://localhost:3000/api/auth/refresh
 Authorization: Bearer {{refresh_token}}
-
 
 @access_token = {{refresh.response.body.accessToken}}
 
