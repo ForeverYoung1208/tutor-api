@@ -97,4 +97,32 @@ async create(): Promise<User> {
 
 ## 5. Development Workflow
 - **MCP Servers**: The project it is possible that there are MCP servers for local database access (yet they can be not available).
-- current openVidu sevrer access: `ssh -i ~/keys/openvidu.pem ubuntu@18.158.33.29` 
+- current OpenVidu server access: `ssh -i ~/keys/openvidu.pem ubuntu@18.158.33.29`
+
+## 6. OpenVidu Integration - IMPORTANT UPDATE
+
+### ⚠️ CRITICAL CHANGE: OpenVidu 3.x Switched to LiveKit SDK
+
+**As of OpenVidu 3.x, the platform has switched from proprietary OpenVidu Node.js SDK to LiveKit SDK.**
+
+#### Evidence:
+- Official OpenVidu 3.x docs state: "All client side operations are exemplified using [LiveKit JS Client SDK](https://docs.livekit.io/client-sdk-js/modules.html)"
+- OpenVidu 3.4.0 release notes: "LiveKit stack updated to v1.9.0: OpenVidu is now based on LiveKit v1.9.0"
+
+#### What This Means:
+- **STOP using** `openvidu-node-client` - it's deprecated
+- **START using** LiveKit SDK for both client and server integration
+- **Client-side**: Use `livekit-client` npm package
+- **Server-side**: Use `livekit-server-sdk` npm package  
+- **API endpoints**: OpenVidu server now provides LiveKit-compatible HTTP API
+
+#### Implementation Approach:
+1. **Install LiveKit SDK**: `npm install livekit-server-sdk livekit-client`
+2. **Refactor services**: Replace OpenViduService with LiveKit integration
+3. **Update client docs**: Reference LiveKit client SDK patterns
+4. **Preserve architecture**: Keep NestJS patterns, just swap the underlying SDK
+
+#### Resources:
+- LiveKit Client SDK: https://docs.livekit.io/client-sdk-js/
+- LiveKit Server SDK: https://docs.livekit.io/server-sdk-js/
+- OpenVidu 3.x docs: https://openvidu.io/latest/docs/developing-your-openvidu-app/how-to/ 

@@ -1,6 +1,8 @@
 # Tutor platform POC api
 
 see AGENTS.md for agents instructions
+see https://docs.livekit.io/reference/client-sdk-js/  for livekit Node.js client documentation
+
 
 ## Development Strategy
 
@@ -28,8 +30,8 @@ see AGENTS.md for agents instructions
 2. **Build NestJS modules:**
    - `auth` - User authentication (✅ Complete)
    - `users` - User management (✅ Complete)
-   - `meetings` - Video meeting orchestration
-   - `recordings` - Recording management
+   - `meetings` - Video meeting orchestration using LiveKit SDK
+   - `recordings` - Recording management using LiveKit SDK
 3. **Leverage LiveKit Node.js SDK** - OpenVidu 3.x is LiveKit-compatible
 4. **Response DTO Pattern:**
    - Use `@UseResponse(ResponseClass)` for automatic transformation
