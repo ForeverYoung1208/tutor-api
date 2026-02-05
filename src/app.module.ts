@@ -6,6 +6,7 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MeetingsModule } from './modules/meetings/meetings.module';
 import { RecordingsModule } from './modules/recordings/recordings.module';
+import { ExceptionFiltersModule } from './exception-filters/exception-filters.module';
 
 @Module({
   imports: [
@@ -17,11 +18,13 @@ import { RecordingsModule } from './modules/recordings/recordings.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => configService.get('databaseConfig')(),
+      useFactory: (configService: ConfigService) =>
+        configService.get('databaseConfig')(),
     }),
     AuthModule,
     UsersModule,
     MeetingsModule,
+    ExceptionFiltersModule,
     RecordingsModule,
   ],
   controllers: [],

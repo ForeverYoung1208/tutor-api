@@ -1,23 +1,31 @@
-import { NestFactory } from '@nestjs/core';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
+import {
+  ClassSerializerInterceptor,
+  Logger,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { validationPipeConfig } from './config/validation-pipe.config';
-import { ENV_LOCAL, ENV_DEV, ENV_STAGE } from './constants/system';
+import { ENV_LOCAL, ENV_STAGE, ENV_DEV } from './constants/system';
 
 async function bootstrap(): Promise<void> {
   Logger.overrideLogger(new Logger('API'));
-  
+
   const app = await NestFactory.create(AppModule);
   const configService = app.get<ConfigService>(ConfigService);
-  const currentEnv = configService.get<string>('NODE_ENV')!;
+  const currentEnv = configService.get<string>('NODE_ENV');
   const port = configService.get<number>('PORT');
   const corsOrigins = configService.get<string>('SITE_ORIGIN');
   const corsOriginsArray = corsOrigins?.split(',').filter(Boolean) ?? [];
 
   app.setGlobalPrefix('api');
-  app.useGlobalPipes(new ValidationPipe(validationPipeConfig));
+  app.useGlobalPipes(new ValidationPipe(configService.get('validation')));
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector), {
+      strategy: 'exposeAll',
+    }),
+  );
 
   app.enableShutdownHooks();
   app.enableCors({ origin: corsOriginsArray });

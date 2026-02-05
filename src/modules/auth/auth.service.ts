@@ -8,6 +8,7 @@ import { JwtUserPayloadDto } from './dto/jwt-user-payload.dto';
 import { User } from '../../entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { checkPassword } from '../../helpers/system';
 import { ErrorCodes } from '../../constants/system';
 
 @Injectable()
@@ -31,8 +32,7 @@ export class AuthService {
     if (!user) {
       throw new Error('Invalid login or password');
     }
-    // TODO: Add password hashing validation with bcrypt
-    const passwordIsValid = password === user.password; // Temporary - replace with bcrypt
+    const passwordIsValid = await checkPassword(password, user.password);
     if (!passwordIsValid) {
       throw new Error('Invalid login or password');
     }
@@ -80,7 +80,9 @@ export class AuthService {
     const secret = this.configService.get<string>('JWT_REFRESH_SECRET_KEY');
     const expiresIn = this.configService.get<string>('REFRESH_TOKEN_TTL');
     if (!secret || !expiresIn) {
-      throw new Error('JWT_REFRESH_SECRET_KEY or REFRESH_TOKEN_TTL is not defined');
+      throw new Error(
+        'JWT_REFRESH_SECRET_KEY or REFRESH_TOKEN_TTL is not defined',
+      );
     }
 
     return this.generateJwtToken(payload, secret, expiresIn);

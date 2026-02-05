@@ -8,15 +8,11 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponse } from './responses/user.response';
+import { User } from '../../entities/user.entity';
 import { WithAuth } from '../../decorators/with-auth.decorator';
 import { UseResponse } from '../../decorators/use-response.decorator';
 
@@ -32,17 +28,9 @@ export class UsersController {
   @ApiOperation({ summary: 'Create a new user' })
   @ApiResponse({ status: 201, type: UserResponse })
   @UseResponse(UserResponse)
-  async create(@Body() createUserDto: CreateUserDto): Promise<UserResponse> {
+  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     this.logger.log(`Creating user with email: ${createUserDto.email}`);
-    const user = await this.usersService.create(createUserDto);
-    
-    return {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    return this.usersService.create(createUserDto);
   }
 
   @Get()
@@ -51,7 +39,7 @@ export class UsersController {
   @ApiResponse({ status: 200, type: [UserResponse] })
   async findAll(): Promise<UserResponse[]> {
     const users = await this.usersService.findAll();
-    return users.map(user => ({
+    return users.map((user) => ({
       id: user.id,
       email: user.email,
       role: user.role,
@@ -69,7 +57,7 @@ export class UsersController {
     if (!user) {
       throw new Error('User not found');
     }
-    
+
     return {
       id: user.id,
       email: user.email,
