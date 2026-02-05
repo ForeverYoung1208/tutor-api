@@ -8,9 +8,11 @@ import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ENV_LOCAL, ENV_STAGE, ENV_DEV } from './constants/system';
+import { initializeTransactionalContext } from 'typeorm-transactional';
 
 async function bootstrap(): Promise<void> {
   Logger.overrideLogger(new Logger('API'));
+  initializeTransactionalContext();
 
   const app = await NestFactory.create(AppModule);
   const configService = app.get<ConfigService>(ConfigService);

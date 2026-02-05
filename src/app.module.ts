@@ -6,6 +6,7 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MeetingsModule } from './modules/meetings/meetings.module';
 import { RecordingsModule } from './modules/recordings/recordings.module';
+import { OpenViduModule } from './modules/openvidu/openvidu.module';
 import { ExceptionFiltersModule } from './exception-filters/exception-filters.module';
 
 @Module({
@@ -23,6 +24,7 @@ import { ExceptionFiltersModule } from './exception-filters/exception-filters.mo
     }),
     AuthModule,
     UsersModule,
+    OpenViduModule,
     MeetingsModule,
     ExceptionFiltersModule,
     RecordingsModule,

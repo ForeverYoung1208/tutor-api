@@ -1,0 +1,25 @@
+### Sign In (Get Tokens)
+
+# @name signin
+curl -X POST http://localhost:3000/api/auth/signin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@example.com",
+    "password": "password123"
+  }'
+
+@access_token = {{signin.response.body.accessToken}}
+@refresh_token = {{signin.response.body.refreshToken}}
+
+
+###
+
+# @name createMeeting
+
+POST http://localhost:3000/api/meetings
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "title": "Math Tutoring Session"
+}

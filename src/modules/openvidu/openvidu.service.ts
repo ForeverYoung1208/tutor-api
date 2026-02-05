@@ -1,0 +1,109 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { RoomServiceClient, AccessToken } from 'livekit-server-sdk';
+import { TOpenviduConfig } from '../../config/openvidu.config';
+
+@Injectable()
+export class OpenViduService {
+  private readonly logger = new Logger(OpenViduService.name);
+  private readonly roomService: RoomServiceClient;
+  private readonly livekitHost: string;
+  private readonly apiKey: string;
+  private readonly apiSecret: string;
+
+  constructor(private readonly configService: ConfigService) {
+    const openviduConfig: TOpenviduConfig =
+      this.configService.get('openvidu')();
+
+    this.livekitHost = openviduConfig.url.replace(/^https?:\/\//, '');
+    this.apiSecret = openviduConfig.secret;
+    this.apiKey = openviduConfig.apiKey;
+
+    if (!this.livekitHost || !this.apiSecret || !this.apiKey) {
+      throw new Error('OpenVidu URL and secret must be configured');
+    }
+
+    this.roomService = new RoomServiceClient(
+      this.livekitHost,
+      this.apiKey,
+      this.apiSecret,
+    );
+  }
+
+  async createRoom(roomName: string): Promise<string> {
+    try {
+      this.logger.log(`Creating room: ${roomName}`);
+
+      const room = await this.roomService.createRoom({
+        name: roomName,
+        emptyTimeout: 300, // 5 minutes
+        maxParticipants: 50,
+      });
+
+      this.logger.log(`Room created successfully: ${room.name}`);
+      return room.name;
+    } catch (error) {
+      this.logger.error(`Failed to create room ${roomName}:`, error);
+      throw error;
+    }
+  }
+
+  async generateToken(
+    roomName: string,
+    participantName: string,
+    participantIdentity?: string,
+  ): Promise<string> {
+    try {
+      this.logger.log(
+        `Generating token for room: ${roomName}, participant: ${participantName}`,
+      );
+
+      const at = new AccessToken(this.apiKey, this.apiSecret, {
+        name: participantName,
+        identity: participantIdentity || participantName,
+      });
+
+      at.addGrant({
+        room: roomName,
+        roomJoin: true,
+        canPublish: true,
+        canSubscribe: true,
+      });
+
+      const token = await at.toJwt();
+      this.logger.log(
+        `Token generated successfully for participant: ${participantName}`,
+      );
+      return token;
+    } catch (error) {
+      this.logger.error(
+        `Failed to generate token for ${participantName}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async deleteRoom(roomName: string): Promise<void> {
+    try {
+      this.logger.log(`Deleting room: ${roomName}`);
+      await this.roomService.deleteRoom(roomName);
+      this.logger.log(`Room deleted successfully: ${roomName}`);
+    } catch (error) {
+      this.logger.error(`Failed to delete room ${roomName}:`, error);
+      throw error;
+    }
+  }
+
+  async listRooms(): Promise<any[]> {
+    try {
+      this.logger.log('Listing rooms');
+      const rooms = await this.roomService.listRooms();
+      this.logger.log(`Found ${rooms.length} rooms`);
+      return rooms;
+    } catch (error) {
+      this.logger.error('Failed to list rooms:', error);
+      throw error;
+    }
+  }
+}

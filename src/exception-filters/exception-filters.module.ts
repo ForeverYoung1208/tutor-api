@@ -5,6 +5,11 @@ import { IExceptionFiltersConfig } from './types';
 import { APP_FILTER } from '@nestjs/core';
 import { UnhandledExceptionsFilter } from './filters/unhandled-exceptions.filter';
 import { ENV_DEV, ENV_LOCAL, ENV_TEST } from '../constants/system';
+import { DataExceptionsFilter } from '../../example/src/exception-filters/filters/data-exceptions.filter';
+import { CommonErrorsWithMessageFilter } from './filters/access-exceptions.filter';
+import { QueryFailedErrorFilter } from './filters/query-failed-error.filter';
+import { ValidationExceptionFilter } from './filters/validation-exception.filter';
+import { StandardNestExceptionsFilter } from './filters/standard-nest-exceptions.filter';
 
 @Module({
   providers: [
@@ -15,7 +20,9 @@ import { ENV_DEV, ENV_LOCAL, ENV_TEST } from '../constants/system';
         const currentEnv = config.get('NODE_ENV');
         return {
           doAttachStack: [ENV_DEV, ENV_LOCAL, ENV_TEST].includes(currentEnv),
-          doLogCommonErrors: [ENV_DEV, ENV_LOCAL, ENV_TEST].includes(currentEnv),
+          doLogCommonErrors: [ENV_DEV, ENV_LOCAL, ENV_TEST].includes(
+            currentEnv,
+          ),
         };
       },
     },
@@ -26,6 +33,26 @@ import { ENV_DEV, ENV_LOCAL, ENV_TEST } from '../constants/system';
     {
       provide: APP_FILTER,
       useClass: UnhandledExceptionsFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: StandardNestExceptionsFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: DataExceptionsFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: CommonErrorsWithMessageFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: QueryFailedErrorFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: ValidationExceptionFilter,
     },
   ],
 })

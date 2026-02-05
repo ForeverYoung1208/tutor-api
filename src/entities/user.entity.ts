@@ -1,5 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { Meeting } from './meeting.entity';
+import { Roles } from '../constants/system';
 
 @Entity('users')
 export class User {
@@ -14,10 +22,10 @@ export class User {
 
   @Column({
     type: 'enum',
-    enum: ['admin', 'user'],
+    enum: Roles,
     default: 'user',
   })
-  role: 'admin' | 'user';
+  role: Roles;
 
   @OneToMany(() => Meeting, (meeting) => meeting.createdBy)
   createdMeetings: Meeting[];

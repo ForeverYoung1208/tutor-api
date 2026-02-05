@@ -2,7 +2,7 @@
 title: 'OpenVidu Integration & Meeting Management System'
 slug: 'openvidu-meeting-system'
 created: '2026-02-05T10:52:00.000Z'
-status: 'ready-for-dev'
+status: 'review'
 stepsCompleted: [1, 2, 3, 4]
 tech_stack: ['NestJS', 'TypeScript', 'TypeORM', 'PostgreSQL', 'JWT', 'OpenVidu', 'AWS S3']
 files_to_modify: ['src/modules/meetings/meetings.module.ts', 'src/modules/recordings/recordings.module.ts', 'package.json', 'src/modules/openvidu/openvidu.module.ts', 'src/modules/openvidu/openvidu.service.ts', 'src/config/openvidu.config.ts', 'src/modules/meetings/meetings.service.ts', 'src/modules/meetings/meetings.controller.ts', 'src/modules/meetings/dto/create-meeting.dto.ts', 'src/modules/meetings/responses/meeting.response.ts', 'src/modules/recordings/recordings.service.ts', 'src/modules/recordings/recordings.controller.ts', 'src/modules/recordings/dto/recording-response.dto.ts', 'src/app.module.ts']

@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { encodePassword } from '../../helpers/system';
+import { Roles } from '../../constants/system';
 
 @Injectable()
 export class UsersService {
@@ -34,5 +35,13 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return this.usersRepository.find();
+  }
+
+  async hasRole(userPartialId: string, roles: Roles[]): Promise<boolean> {
+    const user = await this.findById(userPartialId);
+    if (!user.role) {
+      return false;
+    }
+    return roles.indexOf(user.role) !== -1;
   }
 }

@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { JwtUserPayloadDto } from '../dto/jwt-user-payload.dto';
 import { User } from '../../../entities/user.entity';
-import { UnauthorizedException } from '../../../exceptions/unauthorized.exception';
+import { AccessUnauthorizedException } from '../../../exceptions/access-exceptions';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -21,11 +21,11 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     try {
       user = await this.authService.validateUser(email, password);
     } catch (e) {
-      throw new UnauthorizedException((e as Error)?.message);
+      throw new AccessUnauthorizedException((e as Error)?.message);
     }
 
     if (!user) {
-      throw new UnauthorizedException('Invalid login or password');
+      throw new AccessUnauthorizedException('Invalid login or password');
     }
 
     return { id: user.id };

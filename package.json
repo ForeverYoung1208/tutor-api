@@ -50,10 +50,12 @@
     "bcryptjs": "^3.0.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
+    "livekit-server-sdk": "^2.15.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "pg": "^8.18.0",
+    "typeorm-transactional": "^0.5.0",
     "typescript-eslint": "^8.54.0"
   },
   "devDependencies": {

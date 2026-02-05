@@ -12,3 +12,8 @@ export enum ErrorCodes {
   DATABASE_SERVER_ERROR = 'database-server-error',
   ACCESS_ERROR = 'access-error',
 }
+
+export enum Roles {
+  ADMIN = 'admin',
+  USER = 'user',
+}
