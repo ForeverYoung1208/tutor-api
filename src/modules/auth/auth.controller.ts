@@ -16,6 +16,7 @@ import { ResponseTokenDto } from './dto/response-token.dto';
 import { JwtUserPayloadDto } from './dto/jwt-user-payload.dto';
 import { AuthUser } from '../../decorators/auth-user.decorator';
 import { JwtRefreshAuthGuard } from './guard/jwt-refresh-auth.guard';
+import { UseResponse } from '../../decorators/use-response.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -26,6 +27,7 @@ export class AuthController {
   @ApiOperation({ summary: 'SignIn user' })
   @ApiBody({ type: AuthDto })
   @ApiOkResponse({ type: ResponseTokenDto })
+  @UseResponse(ResponseTokenDto)
   @UseGuards(PasswordAuthGuard)
   @Post('signin')
   async signin(@AuthUser() user: JwtUserPayloadDto): Promise<ResponseTokenDto> {
@@ -39,6 +41,7 @@ export class AuthController {
   @ApiForbiddenResponse({ description: 'access denied' })
   @ApiUnauthorizedResponse({ description: 'invalid refresh token' })
   @ApiBearerAuth()
+  @UseResponse(ResponseTokenDto)
   @UseGuards(JwtRefreshAuthGuard)
   @Get('refresh')
   async refresh(

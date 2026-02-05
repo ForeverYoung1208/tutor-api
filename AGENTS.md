@@ -50,17 +50,17 @@ Other entities still unknown (TBD)
 ### Response DTOs (Serialization)
 - **Location**: `src/modules/<module-name>/responses/`
 - **Naming**: `*.response.ts`
-- **Decorator**: Controllers should use `@UseResponse(ResponseClass)` to automatically apply serialization. See UseResponce decorator implementation at the /example reference project.
+- **Decorator**: Controllers should use `@UseResponse(ResponseClass)` to automatically apply serialization. See UseResponse decorator implementation at `/example` reference project.
+- **Global Strategy**: Uses `excludeAll` strategy in ClassSerializerInterceptor
 - **Base Decorators**:
-  - Classes must use `@Exclude()` to hide properties by default.
-  - Properties exposed to the client must use `@Expose()`.
+  - Properties exposed to client must use `@Expose()`.
+  - No need for `@Exclude()` at class level (excluded by default).
 - **Swagger**: properties need `@ApiProperty()`.
 - **Nested Objects**: 
-  - When nesting objects (e.g., a `ProductResponse` inside `CartsProductsResponse`), you **MUST** use the `@Type(() => ClassName)` decorator from `class-transformer`. Without this, the nested object will not be serialized correctly.
+  - When nesting objects (e.g., a `ProductResponse` inside `CartsProductsResponse`), you **MUST** use `@Type(() => ClassName)` decorator from `class-transformer`. Without this, the nested object will not be serialized correctly.
   
   *Example:*
   ```typescript
-  @Exclude()
   export class ParentResponse {
     @Expose()
     @ApiProperty()
@@ -68,6 +68,19 @@ Other entities still unknown (TBD)
     child!: ChildResponse;
   }
   ```
+
+### Response Transformation Pattern
+- **UseResponse Decorator**: Sets metadata for response class transformation
+- **PlainToResponseInterceptor**: Handles automatic DTO transformation
+- **Global ClassSerializerInterceptor**: Applies `excludeAll` strategy with `@Expose()` rules
+- **Controller Pattern**: Return raw entities, auto-transformed to response DTOs
+
+```typescript
+@UseResponse(UserResponse)
+async create(): Promise<User> {
+  return this.usersService.create(dto); // Auto-transformed to UserResponse
+}
+```
 
 ### Services & repositories
 - Business logic resides in `*.service.ts`.

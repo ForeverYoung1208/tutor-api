@@ -23,7 +23,7 @@ async function bootstrap(): Promise<void> {
   app.useGlobalPipes(new ValidationPipe(configService.get('validation')));
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector), {
-      strategy: 'exposeAll',
+      strategy: 'excludeAll',
     }),
   );
 

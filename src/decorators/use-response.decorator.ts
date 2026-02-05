@@ -1,11 +1,9 @@
-import { applyDecorators } from '@nestjs/common';
-import { ApiResponse } from '@nestjs/swagger';
+import { SetMetadata, UseInterceptors, applyDecorators } from '@nestjs/common';
+import { PlainToResponseInterceptor } from '../interceptors/plain-to-response.interceptor';
 
-export const UseResponse = (ResponseClass: any) => {
+export const UseResponse = (responceClass) => {
   return applyDecorators(
-    ApiResponse({
-      status: 200,
-      type: ResponseClass,
-    }),
+    SetMetadata('response-class', responceClass),
+    UseInterceptors(PlainToResponseInterceptor),
   );
 };

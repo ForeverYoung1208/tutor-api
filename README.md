@@ -26,11 +26,15 @@ see AGENTS.md for agents instructions
 
 1. **Use OpenVidu Meet as reference** - Study LiveKit integration patterns
 2. **Build NestJS modules:**
-   - `auth` - User authentication
-   - `users` - User management  
+   - `auth` - User authentication (✅ Complete)
+   - `users` - User management (✅ Complete)
    - `meetings` - Video meeting orchestration
    - `recordings` - Recording management
 3. **Leverage LiveKit Node.js SDK** - OpenVidu 3.x is LiveKit-compatible
+4. **Response DTO Pattern:**
+   - Use `@UseResponse(ResponseClass)` for automatic transformation
+   - Global `excludeAll` strategy with `@Expose()` decorators
+   - Clean controllers returning raw entities
 
 **Migration Effort Analysis:**
 - Adopting OpenVidu Meet: High effort to restructure, add database, modify architecture
