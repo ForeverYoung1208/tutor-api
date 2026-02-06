@@ -10,14 +10,14 @@ export class OpenViduService {
   private readonly livekitHost: string;
   private readonly apiKey: string;
   private readonly apiSecret: string;
+  private config: TOpenviduConfig;
 
   constructor(private readonly configService: ConfigService) {
-    const openviduConfig: TOpenviduConfig =
-      this.configService.get('openvidu')();
+    this.config = this.configService.get('openvidu')();
 
-    this.livekitHost = openviduConfig.url;
-    this.apiSecret = openviduConfig.secret;
-    this.apiKey = openviduConfig.apiKey;
+    this.livekitHost = this.config.url;
+    this.apiSecret = this.config.secret;
+    this.apiKey = this.config.apiKey;
 
     if (!this.livekitHost || !this.apiSecret || !this.apiKey) {
       throw new Error('OpenVidu URL and secret must be configured');
@@ -36,8 +36,8 @@ export class OpenViduService {
 
       const room = await this.roomService.createRoom({
         name: roomName,
-        emptyTimeout: 300, // 5 minutes
-        maxParticipants: 50,
+        emptyTimeout: this.config.emptyTimeout,
+        maxParticipants: this.config.maxParticipants,
       });
 
       this.logger.log(`Room created successfully: ${room.name}`);
