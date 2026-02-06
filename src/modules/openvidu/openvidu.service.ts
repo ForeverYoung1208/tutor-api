@@ -15,7 +15,7 @@ export class OpenViduService {
     const openviduConfig: TOpenviduConfig =
       this.configService.get('openvidu')();
 
-    this.livekitHost = openviduConfig.url.replace(/^https?:\/\//, '');
+    this.livekitHost = openviduConfig.url;
     this.apiSecret = openviduConfig.secret;
     this.apiKey = openviduConfig.apiKey;
 
