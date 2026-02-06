@@ -21,6 +21,7 @@ import {
 
 import { MeetingsService } from './meetings.service';
 import { CreateMeetingDto } from './dto/create-meeting.dto';
+import { RoomTokenResponseDto } from './responses/token.response';
 import { MeetingResponse } from './responses/meeting.response';
 import { AuthUser } from '../../decorators/auth-user.decorator';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
@@ -54,10 +55,11 @@ export class MeetingsController {
     return this.meetingsService.create(createMeetingDto, user);
   }
 
-  @ApiOperation({ summary: 'Get all meetings' })
+  @ApiOperation({ summary: 'Get all meetings - ' })
   @ApiOkResponse({ type: [MeetingResponse] })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @UseResponse(MeetingResponse)
+  @WithAuth()
   @Get()
   async findAll(): Promise<Meeting[]> {
     return this.meetingsService.findAll();
@@ -68,23 +70,10 @@ export class MeetingsController {
   @ApiNotFoundResponse({ description: 'Meeting not found' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @UseResponse(MeetingResponse)
+  @WithAuth()
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Meeting> {
     return this.meetingsService.findOne(id);
-  }
-
-  @ApiOperation({ summary: 'Join a meeting and get access token' })
-  @ApiOkResponse({ description: 'Access token for meeting' })
-  @ApiNotFoundResponse({ description: 'Meeting not found' })
-  @ApiForbiddenResponse({ description: 'Cannot join this meeting' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @Post(':id/join')
-  async joinMeeting(
-    @Param('id') id: string,
-    @AuthUser() user: JwtUserPayloadDto,
-  ): Promise<{ token: string }> {
-    const token = await this.meetingsService.generateToken(id, user);
-    return { token };
   }
 
   @ApiOperation({ summary: 'End a meeting (Admin or creator only)' })
@@ -92,6 +81,7 @@ export class MeetingsController {
   @ApiNotFoundResponse({ description: 'Meeting not found' })
   @ApiForbiddenResponse({ description: 'Admin or creator access required' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @WithAuth()
   @UseResponse(MeetingResponse)
   @Post(':id/end')
   async endMeeting(
@@ -99,5 +89,22 @@ export class MeetingsController {
     @AuthUser() user: JwtUserPayloadDto,
   ): Promise<Meeting> {
     return this.meetingsService.endMeeting(id, user);
+  }
+
+  @ApiOperation({
+    summary: 'Generate tokens for participants to join a meeting',
+  })
+  @ApiOkResponse({ type: RoomTokenResponseDto })
+  @ApiNotFoundResponse({ description: 'Meeting not found' })
+  @ApiForbiddenResponse({ description: 'Cannot join this meeting' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @WithAuth()
+  @UseResponse(RoomTokenResponseDto)
+  @Get(':id/room-token')
+  async generateTokensForParticipants(
+    @Param('id') id: string,
+    @AuthUser() user: JwtUserPayloadDto,
+  ): Promise<RoomTokenResponseDto> {
+    return this.meetingsService.generateTokensForParticipants(id, user);
   }
 }

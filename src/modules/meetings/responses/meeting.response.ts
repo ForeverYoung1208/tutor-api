@@ -35,5 +35,3 @@ export class MeetingResponse {
   @Expose()
   updatedAt!: Date;
 }
-
-

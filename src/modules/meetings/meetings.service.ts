@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Meeting } from '../../entities/meeting.entity';
 import { CreateMeetingDto } from './dto/create-meeting.dto';
+import { RoomTokenResponseDto } from './responses/token.response';
 import { OpenViduService } from '../openvidu/openvidu.service';
 import { Roles } from '../../constants/system';
 import { JwtUserPayloadDto } from '../auth/dto/jwt-user-payload.dto';
@@ -75,10 +76,10 @@ export class MeetingsService {
     return meeting;
   }
 
-  async generateToken(
+  async generateTokensForParticipants(
     meetingId: string,
     userJwtDto: JwtUserPayloadDto,
-  ): Promise<string> {
+  ): Promise<RoomTokenResponseDto> {
     this.logger.log(
       `Generating token for meeting: ${meetingId}, user id: ${userJwtDto.id}`,
     );
@@ -101,8 +102,11 @@ export class MeetingsService {
       user.id,
     );
 
-    this.logger.log(`Token generated for user id: ${user.id}`);
-    return token;
+    this.logger.log(`Generated token for meeting: ${meetingId}`);
+    return {
+      identity: userJwtDto.id,
+      token,
+    };
   }
 
   async endMeeting(
@@ -133,4 +137,6 @@ export class MeetingsService {
     this.logger.log(`Meeting ended: ${updatedMeeting.id}`);
     return updatedMeeting;
   }
+
+  // TODO: add check if meeting still active and update database (now our DB is possible inconsistent with openvidu)
 }
