@@ -5,11 +5,11 @@ import { IExceptionFiltersConfig } from './types';
 import { APP_FILTER } from '@nestjs/core';
 import { UnhandledExceptionsFilter } from './filters/unhandled-exceptions.filter';
 import { ENV_DEV, ENV_LOCAL, ENV_TEST } from '../constants/system';
-import { DataExceptionsFilter } from '../../example/src/exception-filters/filters/data-exceptions.filter';
 import { CommonErrorsWithMessageFilter } from './filters/access-exceptions.filter';
 import { QueryFailedErrorFilter } from './filters/query-failed-error.filter';
 import { ValidationExceptionFilter } from './filters/validation-exception.filter';
 import { StandardNestExceptionsFilter } from './filters/standard-nest-exceptions.filter';
+import { OtherDataExceptionsFilter } from './filters/data-exceptions.filter';
 
 @Module({
   providers: [
@@ -40,7 +40,7 @@ import { StandardNestExceptionsFilter } from './filters/standard-nest-exceptions
     },
     {
       provide: APP_FILTER,
-      useClass: DataExceptionsFilter,
+      useClass: OtherDataExceptionsFilter,
     },
     {
       provide: APP_FILTER,
