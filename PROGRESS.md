@@ -56,7 +56,6 @@ Building a NestJS backend API POC for a tutoring platform with:
   - Package.json scripts for TypeORM migrations
   - Build configuration optimized (webpack disabled for multiple files)
   - Nest CLI configuration (spec generation disabled)
-
 ### Day 3: Authentication & Response System
 - **[✅] Authentication System**
   - JWT auth with access/refresh tokens (15m/7d)
@@ -66,19 +65,6 @@ Building a NestJS backend API POC for a tutoring platform with:
   - Signin and refresh token endpoints
   - Custom decorators for auth user extraction
 
-- **[✅] Response DTO Pattern**
-  - `@UseResponse(ResponseClass)` decorator for automatic transformation
-  - `PlainToResponseInterceptor` for DTO conversion
-  - Global `excludeAll` strategy with `@Expose()` decorators
-  - Clean controllers returning raw entities
-  - No need for `@Exclude()` at class level
-
-- **[✅] Security Features**
-  - Password hashing with bcrypt (12 salt rounds)
-  - JWT token validation and refresh
-  - Proper error handling for invalid credentials
-  - Protected endpoints with Bearer token authentication
-
 ### Day 4: OpenVidu & Meetings Integration
 - **[✅] OpenVidu Service (LiveKit SDK)**
   - Migrated to `livekit-server-sdk` (OpenVidu 3.x uses LiveKit)
@@ -86,27 +72,40 @@ Building a NestJS backend API POC for a tutoring platform with:
   - Token generation with participant identity
   - Proper configuration from environment variables
 
-- **[✅] Meetings Module**
-  - Meeting service with full CRUD operations
-  - Create meeting endpoint (admin only) - creates LiveKit room
-  - List all meetings endpoint
-  - Get meeting by ID endpoint
-  - Join meeting endpoint - generates LiveKit access token
-  - End meeting endpoint (admin/creator only) - deletes LiveKit room
-  - Meeting response DTOs with proper serialization
-  - Status management (active/ended/recording)
-  - Authorization checks (admin/creator permissions)
+### Day 5: LiveKit Webhook Integration
+- **[✅] Webhook Receiver**
+  - POST /api/openvidu/webhook endpoint for LiveKit events
+  - WebhookEvent and WebhookResponseDto types
+  - Signature verification with test mode support
+  - Event handlers: room_started, room_finished, participant_joined, participant_left
+  - Proper error handling and logging
 
----
+### Day 6: Token Generation & API Simplification
+- **[✅] Simplified Token Flow**
+  - Removed complex emit-tokens endpoint
+  - Personal room token generation via GET /:id/room-token
+  - RoomTokenResponseDto with @Expose() decorators
+  - Single user token focus for POC simplicity
 
 ## 🔄 In Progress
 
-### Recording Management
-- Recording entity exists but no service/controller implementation
-- Need start/stop recording endpoints
-- Need recording list and status management
+### Phase 1: Recording Management
+- **[⏳] Recording Module**
+  - Recording entity exists but no service/controller implementation
+  - Need start/stop recording endpoints
+  - Need recording list and status management
 
----
+### Phase 2: Additional Features
+- **[⏳] Meeting Participants**
+  - Track active participants in meetings
+  - Leave meeting endpoint (optional, mostly client-side)
+  - Participant list endpoint
+
+### Phase 3: Documentation & Testing
+- **[⏳] API Documentation**
+  - Comprehensive Swagger documentation
+  - Endpoint examples and testing
+  - Authentication flow documentation
 
 ## 📋 Next Steps (Priority Order)
 
@@ -130,8 +129,6 @@ Building a NestJS backend API POC for a tutoring platform with:
   - Comprehensive Swagger documentation
   - Endpoint examples and testing
   - Authentication flow documentation
-
----
 
 ## 🛠️ Technical Notes
 
@@ -161,11 +158,9 @@ recordings (id, s3_url, duration, status, meeting_id, created_at)
 - `docker-compose.yml` - Local infrastructure
 - `.env` - Environment variables
 
----
-
 ## 🎯 Current Status
-**Phase**: Meetings Module Complete ✅
+**Phase**: LiveKit Integration Complete ✅
 **Next**: Recording Management  
 **Estimated Completion**: Day 4-5
 
-Core meeting functionality with LiveKit integration is production-ready. Users can create meetings, join with tokens, and end meetings. Recording management is the final major feature.
+Core meeting functionality with LiveKit integration is production-ready. Users can create meetings, join with tokens, and end meetings. Recording management is the final major feature needed for complete tutoring platform POC.
