@@ -7,9 +7,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Meeting } from '../../entities/meeting.entity';
-import { User } from '../../entities/user.entity';
 import { CreateMeetingDto } from './dto/create-meeting.dto';
 import { OpenViduService } from '../openvidu/openvidu.service';
+import { Roles } from '../../constants/system';
+import { JwtUserPayloadDto } from '../auth/dto/jwt-user-payload.dto';
+import { User } from '../../entities/user.entity';
 
 @Injectable()
 export class MeetingsService {
@@ -25,10 +27,10 @@ export class MeetingsService {
 
   async create(
     createMeetingDto: CreateMeetingDto,
-    createdBy: User,
+    userJwtDto: JwtUserPayloadDto,
   ): Promise<Meeting> {
     this.logger.log(
-      `Creating meeting: ${createMeetingDto.title} by user: ${createdBy.email}`,
+      `Creating meeting: ${createMeetingDto.title} by user id: ${userJwtDto.id}`,
     );
 
     // Create OpenVidu session
@@ -40,8 +42,7 @@ export class MeetingsService {
     const meeting = this.meetingRepository.create({
       title: createMeetingDto.title,
       sessionId,
-      createdBy,
-      createdById: createdBy.id,
+      createdById: userJwtDto.id,
       status: 'active',
     });
 
@@ -74,9 +75,12 @@ export class MeetingsService {
     return meeting;
   }
 
-  async generateToken(meetingId: string, user: User): Promise<string> {
+  async generateToken(
+    meetingId: string,
+    userJwtDto: JwtUserPayloadDto,
+  ): Promise<string> {
     this.logger.log(
-      `Generating token for meeting: ${meetingId}, user: ${user.email}`,
+      `Generating token for meeting: ${meetingId}, user id: ${userJwtDto.id}`,
     );
 
     const meeting = await this.findOne(meetingId);
@@ -87,23 +91,33 @@ export class MeetingsService {
       );
     }
 
+    const user = await this.userRepository.findOne({
+      where: { id: userJwtDto.id },
+    });
+
     const token = await this.openViduService.generateToken(
       meeting.sessionId,
       user.email,
       user.id,
     );
 
-    this.logger.log(`Token generated for user: ${user.email}`);
+    this.logger.log(`Token generated for user id: ${user.id}`);
     return token;
   }
 
-  async endMeeting(id: string, user: User): Promise<Meeting> {
-    this.logger.log(`Ending meeting: ${id} by user: ${user.email}`);
+  async endMeeting(
+    id: string,
+    userJwtDto: JwtUserPayloadDto,
+  ): Promise<Meeting> {
+    this.logger.log(`Ending meeting: ${id} by user id: ${userJwtDto.id}`);
 
     const meeting = await this.findOne(id);
+    const user = await this.userRepository.findOne({
+      where: { id: userJwtDto.id },
+    });
 
     // Check if user is admin or meeting creator
-    if (user.role !== 'admin' && meeting.createdById !== user.id) {
+    if (user.role !== Roles.ADMIN && meeting.createdById !== user.id) {
       throw new ForbiddenException(
         'Only admin or meeting creator can end meeting',
       );

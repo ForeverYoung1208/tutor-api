@@ -25,10 +25,10 @@ import { MeetingResponse } from './responses/meeting.response';
 import { AuthUser } from '../../decorators/auth-user.decorator';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { UseResponse } from '../../decorators/use-response.decorator';
-import { User } from '../../entities/user.entity';
 import { Meeting } from '../../entities/meeting.entity';
 import { WithAuth } from '../../decorators/with-auth.decorator';
 import { Roles } from '../../constants/system';
+import { JwtUserPayloadDto } from '../auth/dto/jwt-user-payload.dto';
 
 @ApiTags('Meetings')
 @Controller('meetings')
@@ -49,7 +49,7 @@ export class MeetingsController {
   @Post()
   async create(
     @Body() createMeetingDto: CreateMeetingDto,
-    @AuthUser() user: User,
+    @AuthUser() user: JwtUserPayloadDto,
   ): Promise<Meeting> {
     return this.meetingsService.create(createMeetingDto, user);
   }
@@ -81,7 +81,7 @@ export class MeetingsController {
   @Post(':id/join')
   async joinMeeting(
     @Param('id') id: string,
-    @AuthUser() user: User,
+    @AuthUser() user: JwtUserPayloadDto,
   ): Promise<{ token: string }> {
     const token = await this.meetingsService.generateToken(id, user);
     return { token };
@@ -96,7 +96,7 @@ export class MeetingsController {
   @Post(':id/end')
   async endMeeting(
     @Param('id') id: string,
-    @AuthUser() user: User,
+    @AuthUser() user: JwtUserPayloadDto,
   ): Promise<Meeting> {
     return this.meetingsService.endMeeting(id, user);
   }
