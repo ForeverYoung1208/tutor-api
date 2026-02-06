@@ -5,8 +5,8 @@
 curl -X POST http://localhost:3000/api/auth/signin \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@example.com",
-    "password": "password123"
+    "email": "admin@mail.com",
+    "password": "tutorte...n"
   }'
 
 @access_token = {{signin.response.body.accessToken}}
@@ -41,7 +41,7 @@ Authorization: Bearer {{access_token}}
 
 
 ### Get User by ID
-@user_id=1a965497-a49a-4782-9750-30ad5821680d
+@user_id=4683add1-7b99-438c-b2b5-9d7746a6b39a
 GET http://localhost:3000/api/users/{{user_id}}
 Authorization: Bearer {{access_token}}
 
