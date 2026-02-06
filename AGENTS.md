@@ -1,6 +1,7 @@
 # AI Codebase Instructions & Architecture Overview
 
 This document serves as a knowledge base for LLMs to quickly understand the project structure, patterns, and conventions of the `tutor-api`.
+If available, use mcp sever 'tutor-platform' to access sql database 'tutor_platform' (read only).
 
 ## Project is API for tutoring platform. Core feature - video calls and meetings using openVidu server (installed separately)
 For now it is POC, we need to 

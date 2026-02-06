@@ -5,3 +5,4 @@ _bmad
 .env
 node_modules
 dist
+.kiro
