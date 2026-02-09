@@ -32,7 +32,7 @@ const databaseUsername = 'postgres';
 const targetNodeEnv = 'development';
 
 const siteOrigin =
-  'http://localhost:3000,http://localhost:4200,http://localhost:3001';
+  'http://localhost:3000,http://localhost:4200,http://localhost:3001,https://tutor-platform-dev.click,*';
 
 console.info('using development config...');
 
