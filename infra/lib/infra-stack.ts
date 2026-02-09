@@ -417,20 +417,42 @@ ${commonScript}
     // Tag instance for easy SSM targeting
     cdk.Tags.of(ec2Instance).add('Name', `${projectName}-ec2`);
 
-    // Create EBS volume for database persistence
-    const dbVolume = new ec2.Volume(this, `${projectName}DbVolume`, {
-      availabilityZone: ec2Instance.instanceAvailabilityZone,
-      size: cdk.Size.gibibytes(8), // Minimum for GP3
-      volumeType: ec2.EbsDeviceVolumeType.GP3,
-      removalPolicy: cdk.RemovalPolicy.RETAIN, // Keep volume on stack deletion/updates
-      encrypted: true,
-    });
+    // Try to import existing volume from config, otherwise create new
+    let dbVolume: ec2.IVolume;
+
+    if (config.dbVolumeId) {
+      // Import existing volume (redeployment)
+      dbVolume = ec2.Volume.fromVolumeAttributes(
+        this,
+        `${projectName}DbVolume`,
+        {
+          volumeId: config.dbVolumeId,
+          availabilityZone: ec2Instance.instanceAvailabilityZone,
+        },
+      );
+    } else {
+      // Create new volume (first deployment)
+      const newVolume = new ec2.Volume(this, `${projectName}DbVolume`, {
+        availabilityZone: ec2Instance.instanceAvailabilityZone,
+        size: cdk.Size.gibibytes(8),
+        volumeType: ec2.EbsDeviceVolumeType.GP3,
+        removalPolicy: cdk.RemovalPolicy.RETAIN,
+        encrypted: true,
+      });
+      cdk.Tags.of(newVolume).add('Name', `${projectName}-db-volume`);
+      dbVolume = newVolume;
+
+      new cdk.CfnOutput(this, 'DbVolumeId', {
+        value: newVolume.volumeId,
+        description: `Add this to config.${config.targetNodeEnv}.ts: dbVolumeId: '<this-volume-id>'`,
+      });
+    }
 
     // Attach volume to instance
     new ec2.CfnVolumeAttachment(this, `${projectName}DbVolumeAttachment`, {
       instanceId: ec2Instance.instanceId,
       volumeId: dbVolume.volumeId,
-      device: '/dev/sdf', // Will appear as /dev/nvme1n1 on Nitro instances
+      device: '/dev/sdf',
     });
 
     /**

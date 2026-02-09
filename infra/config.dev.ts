@@ -52,4 +52,5 @@ export const config: IAppStackConfig = {
   s3BucketName,
   awsAccessKeyId: 'your-aws-access-key-id-to-access-s3-bucket',
   livekitApiKey: 'your-livekit-api-key',
+  dbVolumeId: undefined, // Set to volume ID after first deployment
 };

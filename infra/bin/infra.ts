@@ -20,6 +20,7 @@ export interface IAppStackConfig {
   awsAccessKeyId: string;
   livekitApiKey: string;
   typeormLogging: 'true' | 'false';
+  dbVolumeId: string | undefined; // Set after first deployment to reuse volume
 }
 
 const app = new cdk.App();
