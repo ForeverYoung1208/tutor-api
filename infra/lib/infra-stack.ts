@@ -260,6 +260,31 @@ export class InfraStack extends cdk.Stack {
     const userDataVersion = 'v12'; // bump this whenever you want user data to re-run
 
     // Create a start script
+    const mountEbsScript = `#!/bin/bash
+set -ex
+echo "Mounting EBS volume for database..."
+
+DEVICE=\$(lsblk -o NAME,SERIAL | grep \$(echo vol-* | sed "s/-//") | awk '{print "/dev/"\$1}')
+if [ -z "\$DEVICE" ]; then 
+  DEVICE=/dev/nvme1n1
+fi
+
+if ! blkid \$DEVICE; then 
+  mkfs -t ext4 \$DEVICE
+fi
+
+mkdir -p /mnt/db-data
+mount \$DEVICE /mnt/db-data
+
+UUID=\$(blkid -s UUID -o value \$DEVICE)
+if ! grep -q "\$UUID" /etc/fstab; then
+  echo "UUID=\$UUID /mnt/db-data ext4 defaults,nofail 0 2" >> /etc/fstab
+fi
+
+chown -R 999:999 /mnt/db-data
+echo "EBS volume mounted successfully"
+`;
+
     const commonScript = `#!/bin/bash
   set -ex
   echo "Starting services and application..."
@@ -328,6 +353,13 @@ ${commonScript}
       `echo "UserData version: ${userDataVersion}"`,
       'yum update -y',
       'yum install -y docker git unzip',
+
+      // Mount EBS volume BEFORE starting Docker
+      'mkdir -p /var/www/app',
+      `cat > /var/www/app/mount-ebs.sh << 'EOL'\n${mountEbsScript}\nEOL`,
+      'chmod +x /var/www/app/mount-ebs.sh',
+      '/var/www/app/mount-ebs.sh',
+
       'systemctl start docker',
       'systemctl enable docker',
       'usermod -a -G docker ec2-user',
@@ -344,7 +376,6 @@ ${commonScript}
       'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"',
       'unzip -q awscliv2.zip',
       './aws/install',
-      'mkdir -p /var/www/app',
       'chown ec2-user:ec2-user /var/www/app',
       'cd /var/www/app',
       `aws s3 sync s3://${codeBucket.bucketName}/ . --region ${this.region}`,
@@ -385,6 +416,22 @@ ${commonScript}
 
     // Tag instance for easy SSM targeting
     cdk.Tags.of(ec2Instance).add('Name', `${projectName}-ec2`);
+
+    // Create EBS volume for database persistence
+    const dbVolume = new ec2.Volume(this, `${projectName}DbVolume`, {
+      availabilityZone: ec2Instance.instanceAvailabilityZone,
+      size: cdk.Size.gibibytes(8), // Minimum for GP3
+      volumeType: ec2.EbsDeviceVolumeType.GP3,
+      removalPolicy: cdk.RemovalPolicy.RETAIN, // Keep volume on stack deletion/updates
+      encrypted: true,
+    });
+
+    // Attach volume to instance
+    new ec2.CfnVolumeAttachment(this, `${projectName}DbVolumeAttachment`, {
+      instanceId: ec2Instance.instanceId,
+      volumeId: dbVolume.volumeId,
+      device: '/dev/sdf', // Will appear as /dev/nvme1n1 on Nitro instances
+    });
 
     /**
      *
