@@ -5,6 +5,7 @@ const projectShortName = 'tutor-platform';
 
 // define AWS region
 const region = 'eu-central-1';
+const AZ = 'eu-central-1a';
 
 // define postfix for environment resources to specify
 const suffix = '-dev';
@@ -29,16 +30,24 @@ const userDeploerName = `${projectName}-deployer`;
 // database name
 const databaseName = projectShortName + suffix.replace('-', ''); // DatabaseName must begin with a letter and contain only alphanumeric characters
 const databaseUsername = 'postgres';
+const dbVolumeId = 'vol-042b7e99a4d8f9ff2'; // Set udefined to create a new volume or set to volume ID to reuse existing volume
+
 const targetNodeEnv = 'development';
 
+// define site origin for cors
 const siteOrigin =
-  'http://localhost:3000,http://localhost:4200,http://localhost:3001,https://tutor-platform-dev.click,*';
+  'http://localhost:3000,http://localhost:4200,http://localhost:3001,http://localhost:5173,https://tutor-platform-dev.click';
+
+const awsAccessKeyId = 'your-aws-access-key-id-to-access-s3-bucket';
+const livekitApiKey = 'your-livekit-api-key';
+
+const typeormLogging = 'true';
 
 console.info('using development config...');
 
 export const config: IAppStackConfig = {
   databaseName,
-  typeormLogging: 'true',
+  typeormLogging,
   domainName,
   projectName,
   subDomainNameApp,
@@ -49,8 +58,9 @@ export const config: IAppStackConfig = {
   siteOrigin,
   livekitUrl,
   region,
+  AZ,
   s3BucketName,
-  awsAccessKeyId: 'your-aws-access-key-id-to-access-s3-bucket',
-  livekitApiKey: 'your-livekit-api-key',
-  dbVolumeId: undefined, // Set to volume ID after first deployment
+  awsAccessKeyId,
+  livekitApiKey,
+  dbVolumeId,
 };

@@ -16,6 +16,7 @@ export interface IAppStackConfig {
   siteOrigin: string;
   livekitUrl: string;
   region: string;
+  AZ: string;
   s3BucketName: string;
   awsAccessKeyId: string;
   livekitApiKey: string;

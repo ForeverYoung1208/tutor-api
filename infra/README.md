@@ -36,6 +36,19 @@ The bootstrap is a one-time setup per region and creates minimal, low-cost infra
 
 ## Deploy
 
+**Recommended method (with automatic volume detachment):**
+
+```bash
+$ npm run deploy -- dev
+```
+
+This will automatically detach the EBS volume if needed and deploy the stack.
+
+**Why volume detachment is needed:**
+When you bump `userDataVersion` in the stack, CDK replaces the EC2 instance. However, the persistent EBS volume (containing the database) can only be attached to one instance at a time. CDK tries to create the new instance and attach the volume before destroying the old instance, which fails because the volume is still attached to the old instance. The deploy script automatically detaches the volume from the old instance before deployment to avoid this conflict.
+
+**Manual method:**
+
 ```bash
 $ npx cdk deploy --all --context targetEnv=dev
 ```
@@ -46,12 +59,17 @@ OR if you want to cancel rollback if something went wrong (for debug purposes):
 $ npx cdk deploy --all --context targetEnv=dev --no-rollback
 ```
 
+**Note:** If using manual deployment and you've changed user data script or made other changes that force CDK to replace the EC2 instance, you must manually detach the volume first:
+```bash
+$ npm run detach-volume -- dev
+```
+
 ## troubleshooting
 
 ### 1.  get ssh access key
 
 ```bash
-aws ssm get-parameter --name "/ec2/keypair/key-07eedf646ad34d126" --with-decryption --query "Parameter.Value" --output text --region eu-central-1 > ~/.ssh/simplenestjs-dev-key.pem
+aws ssm get-parameter --name "/ec2/keypair/<keyId like key-07eedf646ad34d126>" --with-decryption --query "Parameter.Value" --output text --region eu-central-1 > ~/.ssh/simplenestjs-dev-key.pem
 ```
 
 Set proper permissions:
@@ -63,7 +81,7 @@ chmod 400 ~/.ssh/simplenestjs-dev-key.pem
 ### 2. Get the instance's public IP:
 
 ```bash
-INSTANCE_IP=$(aws ec2 describe-instances --instance-ids i-05783b1bc9b341f7d --region eu-central-1 --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
+INSTANCE_IP=$(aws ec2 describe-instances --instance-ids <instanceId like i-05783b1bc9b341f7d> --region eu-central-1 --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
 echo $INSTANCE_IP
 ```
 

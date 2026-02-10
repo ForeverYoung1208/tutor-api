@@ -8,7 +8,9 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "detach-volume": "ts-node scripts/detach-volume.ts",
+    "deploy": "ts-node scripts/deploy.ts"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

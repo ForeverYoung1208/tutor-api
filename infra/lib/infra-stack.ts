@@ -141,7 +141,7 @@ export class InfraStack extends cdk.Stack {
     // VPC
     const vpc = new ec2.Vpc(this, `${projectName}VPC`, {
       ipAddresses: ec2.IpAddresses.cidr('10.0.0.0/16'),
-      maxAzs: 1,
+      availabilityZones: [config.AZ],
       natGateways: 0,
       subnetConfiguration: [
         {
@@ -257,17 +257,15 @@ export class InfraStack extends cdk.Stack {
     codeBucket.grantRead(ec2Role);
 
     const userData = ec2.UserData.forLinux();
-    const userDataVersion = 'v12'; // bump this whenever you want user data to re-run
+    const userDataVersion = 'v16'; // bump this whenever you want user data to re-run
 
     // Create a start script
     const mountEbsScript = `#!/bin/bash
 set -ex
 echo "Mounting EBS volume for database..."
 
-DEVICE=\$(lsblk -o NAME,SERIAL | grep \$(echo vol-* | sed "s/-//") | awk '{print "/dev/"\$1}')
-if [ -z "\$DEVICE" ]; then 
-  DEVICE=/dev/nvme1n1
-fi
+# Find the attached EBS volume (not the root volume)
+DEVICE=/dev/nvme1n1
 
 if ! blkid \$DEVICE; then 
   mkfs -t ext4 \$DEVICE
@@ -397,6 +395,7 @@ ${commonScript}
       securityGroup: apiSecurityGroup,
       vpcSubnets: {
         subnetType: ec2.SubnetType.PUBLIC,
+        availabilityZones: [config.AZ],
       },
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T3,
@@ -421,7 +420,7 @@ ${commonScript}
     let dbVolume: ec2.IVolume;
 
     if (config.dbVolumeId) {
-      // Import existing volume (redeployment)
+      // dbVolumeId is set in config.ts - Import existing volume (redeployment)
       dbVolume = ec2.Volume.fromVolumeAttributes(
         this,
         `${projectName}DbVolume`,
@@ -431,13 +430,13 @@ ${commonScript}
         },
       );
     } else {
-      // Create new volume (first deployment)
+      // dbVolumeId is not set in config.ts - Create new volume (first deployment)
       const newVolume = new ec2.Volume(this, `${projectName}DbVolume`, {
         availabilityZone: ec2Instance.instanceAvailabilityZone,
-        size: cdk.Size.gibibytes(8),
+        size: cdk.Size.gibibytes(1),
         volumeType: ec2.EbsDeviceVolumeType.GP3,
         removalPolicy: cdk.RemovalPolicy.RETAIN,
-        encrypted: true,
+        encrypted: false,
       });
       cdk.Tags.of(newVolume).add('Name', `${projectName}-db-volume`);
       dbVolume = newVolume;
